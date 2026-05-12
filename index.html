@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Eldritch</title>
+
+  <style>
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      color: white;
+      overflow-x: hidden;
+      cursor: none;
+    }
+
+    /* Background */
+    .background {
+      position: fixed;
+      inset: 0;
+      background-image: url("background.jpg");
+      background-size: cover;
+      background-position: center;
+      filter: blur(8px);
+      transform: scale(1.1);
+      z-index: -3;
+    }
+
+    /* Particle canvas */
+    canvas {
+      position: fixed;
+      inset: 0;
+      z-index: -2;
+      pointer-events: none;
+    }
+
+    /* Logo float */
+    .logo {
+      position: fixed;
+      top: 15px;
+      right: 15px;
+      width: 80px;
+      animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+      100% { transform: translateY(0px); }
+    }
+
+    /* Layout */
+    .content {
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 20px;
+    }
+
+    .box {
+      background: rgba(0,0,0,0.45);
+      padding: 25px;
+      border-radius: 12px;
+      transition: background 0.2s ease, box-shadow 0.2s ease;
+      will-change: transform;
+    }
+
+    a {
+      color: #7ec8ff;
+      text-decoration: none;
+    }
+
+    a:hover {
+      color: #ade5ff;
+      text-shadow: 0 0 18px rgba(126, 200, 255, 0.45);
+    }
+
+    .box:hover {
+      background: rgba(0, 0, 0, 0.58);
+      box-shadow: 0 0 45px rgba(0, 0, 0, 0.18);
+    }
+
+    #custom-cursor {
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: 28px;
+      height: 28px;
+      border: 2px solid rgba(0, 0, 0, 1);
+      border-radius: 50%;
+      transform: translate(-50%, -50%) scale(1);
+      pointer-events: none;
+      transition: transform 0.18s ease, border-color 0.2s ease, background-color 0.2s ease, opacity 0.2s ease;
+      z-index: 9999;
+      background: transparent;
+      box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(0, 0, 0, 0.6);
+    }
+
+    #custom-cursor::before {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 6px;
+      height: 6px;
+      background: rgba(0, 0, 0, 1);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    body.cursor-hover #custom-cursor {
+      transform: translate(-50%, -50%) scale(2);
+      border-color: rgba(0, 0, 0, 1);
+    }
+
+    a,
+    .box {
+      cursor: none;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="background"></div>
+<canvas id="particles"></canvas>
+
+<img class="logo" src="logo.png" />
+
+<div class="content">
+  <div class="box">
+    <h1>Eldritch</h1>
+    <p>I am a solo developer working on this Roblox game.</p>
+    <p>If you are interested in collaborating, feel free to reach out via email.</p>
+    <p>You can get 50 percent ownership of the game.</p>
+    <p><a href="mailto:gh5678x@gmail.com">Email Me</a></p>
+  </div>
+</div>
+
+<script>
+/* =========================
+   PARTICLE SYSTEM (WIND)
+========================= */
+const canvas = document.getElementById("particles");
+const ctx = canvas.getContext("2d");
+
+let w, h;
+function resize() {
+  w = canvas.width = window.innerWidth;
+  h = canvas.height = window.innerHeight;
+}
+window.addEventListener("resize", resize);
+resize();
+
+const particles = [];
+const COUNT = 60;
+
+for (let i = 0; i < COUNT; i++) {
+  particles.push({
+    x: Math.random() * w,
+    y: Math.random() * h,
+    r: Math.random() * 2 + 1,
+    speedY: Math.random() * 0.5 + 0.2,
+    speedX: Math.random() * 0.8 - 0.4
+  });
+}
+
+function drawParticles() {
+  ctx.clearRect(0, 0, w, h);
+
+  for (let p of particles) {
+    p.x += p.speedX + Math.sin(Date.now() * 0.001 + p.y) * 0.3;
+    p.y += p.speedY;
+
+    // wrap
+    if (p.y > h) p.y = 0;
+    if (p.x > w) p.x = 0;
+    if (p.x < 0) p.x = w;
+
+    ctx.fillStyle = "rgba(255,255,255,0.6)";
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  requestAnimationFrame(drawParticles);
+}
+drawParticles();
+
+const cursor = document.createElement("div");
+cursor.id = "custom-cursor";
+document.body.appendChild(cursor);
+
+window.addEventListener("mousemove", event => {
+  cursor.style.left = `${event.clientX}px`;
+  cursor.style.top = `${event.clientY}px`;
+});
+
+const hoverTargets = document.querySelectorAll("a, .box");
+hoverTargets.forEach(el => {
+  el.addEventListener("mouseenter", () => document.body.classList.add("cursor-hover"));
+  el.addEventListener("mouseleave", () => document.body.classList.remove("cursor-hover"));
+});
+
+const boxes = Array.from(document.querySelectorAll(".box"));
+const boxStates = boxes.map(() => ({ y: 0, velocity: 0 }));
+
+let lastScroll = window.scrollY;
+let targetScroll = lastScroll;
+
+window.addEventListener("scroll", () => {
+  targetScroll = window.scrollY;
+});
+
+function animateScrollEffect() {
+  const currentScroll = targetScroll;
+  const scrollDelta = currentScroll - lastScroll;
+  lastScroll = currentScroll;
+
+  boxes.forEach((box, index) => {
+    const state = boxStates[index];
+    const target = -scrollDelta * 2.5;
+
+    state.velocity += (target - state.y) * 0.22;
+    state.velocity *= 0.72;
+    state.y += state.velocity;
+
+    box.style.transform = `translate3d(0, ${state.y}px, 0)`;
+  });
+
+  requestAnimationFrame(animateScrollEffect);
+}
+
+animateScrollEffect();
+</script>
+
+</body>
+</html>
