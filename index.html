@@ -123,6 +123,13 @@
     .box {
       cursor: none;
     }
+
+    /* Hide custom cursor on touch devices (mobile) */
+    @media (hover: none) {
+      #custom-cursor {
+        display: none;
+      }
+    }
   </style>
 </head>
 
